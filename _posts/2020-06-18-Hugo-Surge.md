@@ -10,25 +10,19 @@ tags: [Surge, Hugo]
 
 ![hugo](/assets/img/sample/surge-hugo/hugo.png)
 
-En esta entrada se va a explicar como utilizar Surge y Hugo. 
+Imaginemos que queremos crear un sitio web con páginas estáticas como puede ser un blog. Con conocimientos mínimos de HTML no es muy complicado, ¿verdad?. No, no es necesario conocer HTML, además, mantener el sitio se convertiría en un trabajo tedioso. Para eso hay multitud de herramientas que nos pueden ayudar con nuestro proyecto. Pero si lo que se quiere es crear un sitio con páginas estáticas la mejor opción es elegir un generador de páginas estáticas. Hay multitud de aplicaciones para ello como pueden ser Wordpress, Jekyll o, la que se explica a continuación, Hugo que crea las páginas a través de ficheros markdown. Y, una vez creemos nuestro sitio, ¿donde lo colocamos?. Para el despliegue se usará Surge, aunque esta elección de herramientas permite infinidad de combinaciones.
 
-Ver y probar
-**1. Selecciona una combinación entre generador de páginas estáticas y servicio donde desplegar la página web. Escribe tu propuesta en redmine, cada propuesta debe ser original.**
-~~~
-Surge - Hugo
-~~~
+## Instalación del Hugo
+En la [página oficial de Hugo](https://gohugo.io/) se encuentra toda la documentación necesaria para su instalación. A continuación se indican los pasos fundamentales:
 
-**2. Comenta la instalación del generador de página estática. Recuerda que el generador tienes que instalarlo en tu entorno de desarrollo. Indica el lenguaje en el que está desarrollado y el sistema de plantillas que utiliza.**
-
-HUGO: Lenguaje: Go. Sistema de plantillas: Go.
-
-Instalación de Hugo:
+Instalación:
 ~~~
 sudo apt-get install hugo
 ~~~
 
+Creación del primer sitio:
 ~~~
-$ hugo new site quickstart
+$ hugo new site <nombre_del_sitio>
 Congratulations! Your new Hugo site is created in /home/paloma/DISCO2/CICLO II/IMPLANTACIÓN DE APLICACIONES WEB/1.Generador_pag_estatica/quickstart.
 
 Just a few more steps and you're ready to go:
@@ -43,30 +37,35 @@ Just a few more steps and you're ready to go:
 Visit https://gohugo.io/ for quickstart guide and full documentation.
 ~~~
 
+Lo más sencillo para instalar un tema en nuestro sitio web es [buscar en el repositorio oficial](https://themes.gohugo.io/) y copiar el repositorio. A continuación, indicar el tema que se va a utilizar en el fichero config.yoml. En este ejemplo el tema usado se llama *terrassa*.
 ~~~
-$ cd quickstart
-$ git init
-Inicializado repositorio Git vacío en /home/paloma/DISCO2/CICLO II/IMPLANTACIÓN DE APLICACIONES WEB/1.Generador_pag_estatica/quickstart/.git/
-paloma@coatlicue:~/DISCO2/CICLO II/IMPLANTACIÓN DE APLICACIONES WEB/1.Gene
-rador_pag_estatica/quickstart$ git submodule add https://github.com/budparr/gohugo-theme-ananke.git themes/ananke
-Clonando en '/home/paloma/DISCO2/CICLO II/IMPLANTACIÓN DE APLICACIONES WEB/1.Generador_pag_estatica/quickstart/themes/ananke'...
+$ $ git submodule add https://github.com/danielkvist/hugo-terrassa-theme.git terrassa
+Clonando en '/$USER/quickstart/themes/terrassa'...
 remote: Enumerating objects: 5, done.
 remote: Counting objects: 100% (5/5), done.
 remote: Compressing objects: 100% (5/5), done.
 remote: Total 1416 (delta 0), reused 1 (delta 0), pack-reused 1411
 Recibiendo objetos: 100% (1416/1416), 4.15 MiB | 3.55 MiB/s, listo.
 Resolviendo deltas: 100% (764/764), listo.
-$ echo 'theme = "ananke"' >> config.toml
+$ echo 'theme = "hugo-terrassa-theme"' >> config.toml
+~~~
+
+En el fichero **config.toml** se modifican los parámetros principales para configurar el sitio web:
+~~~
+baseURL = "/"
+title = "Un pez llamado Wanda"
+author = "Paloma R."
+googleAnalytics = ""
+defaultContentLanguage = "en"
+language = "en-US"
+paginate = 3
+
+theme = "hugo-terrassa-theme"
+...
 ~~~
 
 
-
-
-**3. Configura el generador para cambiar el nombre de tu página, el tema o estilo de la página,… Indica cualquier otro cambio de configuración que hayas realizado.**
-
-Modifico el fichero quickstart/content/posts/my-first-post.md para añadir nuevos post. 
-
-Para cambiar el nombre de la página ha que modificar el fichero config.toml.
+Para poblar el blog de entradas se añaden los ficheros con extensión .md en el directorio /content/posts/ y utilizar el comando hugo para generar las páginas en HTML:
 ~~~
 $ hugo
 
@@ -84,34 +83,8 @@ $ hugo
 Total in 82 ms
 ~~~
 
-Para modificar el tema de la página estática nos hemos descargado un repositorio de gitHub con un tema cuyo formato es agradable. Reemplazamos los ficheros que contiene quickstart por los del repositorio y modificamos el fichero config.toml con nuestros parámetros:
-~~~
-baseURL = "/"
-title = "Un pez llamado Wanda"
-author = "Paloma R. García Campón"
-googleAnalytics = ""
-defaultContentLanguage = "en"
-language = "en-US"
-paginate = 3
-
-theme = "hugo-terrassa-theme"
-...
-~~~
-
-Los fichero .md que queremos añadir a la página los guardamos en el fichero /quistart/content. En nuestro caso los añadimos en el directorio /post.
-
-
-**4. Genera un sitio web estático con al menos 3 páginas. Deben estar escritas en Markdown y deben tener los siguientes elementos HTML: títulos, listas, párrafos, enlaces e imágenes. El código que estas desarrollando, configuración del generado, páginas en markdown,… debe estar en un repositorio Git (no es necesario que el código generado se guarde en el repositorio, evitalo usando el fichero .gitignore).**
-
-[El_pez_llamado_Wanda(GitHub)]( https://github.com/PalomaR88/El_pez_llamado_Wanda "El pez llamado Wanda(GitHub)")
-
-
-
-[El_pez_llamado_Wanda]( http://el_pez_llamado_wanda.surge.sh/ "El pez llamado Wanda")
-
-**5. Explica el proceso de despliegue utilizado por el servicio de hosting que vas a utilizar.**
-
-En primer lugar hay que instalar surge:
+## Instalación de surge
+De nuevo, en el [sitio oficial de Surge](https://surge.sh/) se encuentra la documentación necesaria para la sencilla instalación de esta herramienta:
 ~~~
 $ sudo npm install --global surge
 npm WARN npm npm does not support Node.js v10.15.2
@@ -124,8 +97,11 @@ npm WARN npm You can find the latest version at https://nodejs.org/
 added 137 packages from 113 contributors in 22.737s
 ~~~
 
+Y para desplegar el sitio web solo hay que introducir el comando surge y completar los datos que se piden.
 
-**6. Piensa algún método (script, scp, rsync, git,…) que te permita automatizar la generación de la página (integración continua) y el despliegue automático de la página en el entorno de producción, después de realizar un cambio de la página en el entorno de desarrollo. Muestra al profesor un ejemplo de como al modificar la página se realiza la puesta en producción de forma automática.**
+## Automatización
+Cuando se quiera modificar el sitio web se deberán volver a usar los comando hugo y surge además de guardar los cambios en el repositorio. Para automatizar todas estas acciones se ha generado un sencillo script:
+
 ~~~
 #! bin/sh
 
@@ -143,4 +119,5 @@ hugo
 surge public/ el_pez_llamado_wanda.surge.sh
 ~~~
 
-
+## Resultado
+Los ficheros de configuración resultantes se encuentran en el [siguiente repositorio de GitHub]( https://github.com/PalomaR88/El_pez_llamado_Wanda "El pez llamado Wanda(GitHub)"). Y [El_pez_llamado_Wanda]( http://el_pez_llamado_wanda.surge.sh/ "El pez llamado Wanda") es la sitio web que se ha creado.
