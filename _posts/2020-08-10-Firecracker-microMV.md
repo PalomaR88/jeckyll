@@ -1,10 +1,13 @@
 ---
-title: Introducción a MicroMV con Firecracker
+title: Introducción a MicroVM con Firecracker
 author: Paloma R. García Campón
 date: 2020-06-24 00:00:00 +0800
 categories: [Administración de sistemas operativos]
 tags: [KVM, microVM, Firecracker]
 ---
+
+¿Sabías qué en la China del siglo IX, intentando crear una poción para la inmortalidad, los taoístas inventan la pólvora que pronto fue usada como espectáculo visual mediante lo que hoy conocemos como petardos? ¿Sabías qué el tema de este post no es original, sino que decidí indagar en el tema a partir de un trabajo de un compañero? Nada de esto es importante para acercarse a Firecracker y la creación de MicroVM que es lo que intentaré en este post.
+
 
 ![kubernetes](/assets/img/sample/firecracker/firecracker.jpgsample/firecracker/firecracker.jpg)
 
@@ -190,7 +193,7 @@ Se va a crear una variable que será un número aleatorio para la ruta del socke
 NMV=$(shuf -i 0-10 -n 1)
 ~~~
 
-Y se crear microVM, con el kernel y el sistema de ficheros creados en el punto anterior. Se han copiado en el fichero /tmp:
+Y se crear microVM, con la imagen del kernel y el sistema de ficheros creados en el punto anterior. Se han copiado en el fichero /tmp:
 ~~~
 sudo ./firectl \
   --firecracker-binary=./firecracker \
@@ -200,27 +203,15 @@ sudo ./firectl \
   --kernel-opts="console=ttyS0 noapic reboot=k panic=1 pci=off nomodules ro" \
   --socket-path=./firecracker-$NMV.socket
 ~~~
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
-**********AQUI EXPLICAR QUE SIGNIFICAR LA CONFIGURACION ANTERIOR******
-*
-*
-*
-*
-*
-*
-*
-*
-*
+
+Estas son las opciones que se han utilizado:
+- **firecracker-binary**: ruta del binario de firecracker.
+- **kernel**: ruta a la imagen del kernel.
+- **root-drive**: ruta a la imagen del disco raíz.
+- **cpu-template**: plantilla de CPU. Actualmente, Firecracker dispone de C3 y T2.
+- **kernel-opts**: línea de compandos del kernel. 
+- **socket-path**: ruta para usar el socket de Firecracker. Es un fichero único.
+
 Tras loguarse con el usuario root y misma contraseña este es el resultado:
 ~~~
 Welcome to Alpine Linux 3.8
@@ -242,19 +233,13 @@ login[856]: root login on 'ttyS0'
 localhost:~# 
 ~~~
 
-*
-*
-*
-*
-*
-*************SEGUIR AQUÍ****************
-
 Para parar la máquina:
+~~~
 reboot
-
+~~~
 
 ## Agregar un disco externo
-Crear una imagen qcow2:
+En primer lugar se va a crear una imagen qcow2 de 100M:
 ~~~
 qemu-img create -f qcow2 file.qcow2 100M
 ~~~
@@ -264,50 +249,149 @@ Se configura la imagen para que utilice el sistema de ficheros ext4:
 sudo mkfs.ext4 file.qcow2
 ~~~
 
-Y se inicia la MicroVM agregando el disco:
+Y se inicia la MicroVM, con las mismas opciones que en el punto anterior, agregando el disco:
 ~~~
-firectl \
---kernel=/tmp/hello-vmlinux.bin \
---root-drive=/tmp/hello-rootfs.ext4 \
---kernel-opts="console=ttyS0 noapic reboot=k panic=1 pci=off nomodules rw" \
---add-drive=file.qcow2:rw
+sudo ./firectl \
+  --firecracker-binary=./firecracker \
+  --kernel=/tmp/hello-vmlinux.bin \
+  --root-drive=/tmp/hello-rootfs.ext4 \
+  --cpu-template=T2 \
+  --kernel-opts="console=ttyS0 noapic reboot=k panic=1 pci=off nomodules ro" \
+  --socket-path=./firecracker-$NMV.socket \
+  --add-drive=file.qcow2:rw
 ~~~
 
 Una vez iniciada la máquina se verifica que contiene el disco:
-~~~VERIFICAR ESTO DENTRO
-fdisk -l
-
+~~~
+localhost:~# fdisk -l
 Disk /dev/vda: 30 MiB, 31457280 bytes, 61440 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
 I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
 Disk /dev/vdb: 192 KiB, 196608 bytes, 384 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
 I/O size (minimum/optimal): 512 bytes / 512 bytes
 ~~~
 
-Y puede montarse para ser usada por la MicroMV:
+
+Como en cualquier otra máquina, el disco puede montarse para ser usada:
 ~~~
-mount /dev/vdb /mnt
+localhost:~# mount /dev/vdb /mnt/
+[  119.899149] EXT4-fs (vdb): mounted filesystem without journal. Opts: (null)
+localhost:~# lsblk
+NAME MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda  254:0    0   30M  0 disk /
+vdb  254:16   0  192K  0 disk /mnt
 ~~~
 
 
 ## Configuración de una interfaz de red
-Se crea un tap:
+En primer lugar se necesita un punto de acceso que en nuestro caso será una interfaz de red virtual que se creará usando tap:
+~~~
+sudo ip tuntap add tap0 mode tap # user $(id -u) group $(id -g)
 ~~~
 
-.
-.
-.
+Y se configura se configura la red y se levanta:
+~~~
+sudo ip addr add 172.20.0.1/24 dev tap0
+sudo ip link set tap0 up
+~~~
+
+A continuación, se proporcionan las reglas de iptables para habilitar el reenvío de paquetes. En primer lugar, comprobando el nombre del dispositivo de interfaz principal y añadiendolo a una variable:
+~~~
+DEVICE_NAME=wlp1s0
+~~~
+
+Se activa el, conocido cómo, "IP forwarding":
+~~~
+sudo sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+~~~
+
+Regla SNAT para que los equipos de la LAN puedan acceder al exterior, especificando la tabla, `-t`, añadiendo la regla al final, `-A` e indicando la interfaz de red de salida,`-o`:
+~~~
+sudo iptables -t nat -A POSTROUTING -o $DEVICE_NAME -j MASQUERADE
+~~~
+
+La siguiente regla carga un módulo, `-m`, con estados concretos:
+~~~
+sudo iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+~~~
+
+Y, por último, se permite la tranmisión de paquetes desde el tap, `-i`, y el dipositivo de interfaz principal, `-o`:
+~~~
+sudo iptables -A FORWARD -i tap0 -o $DEVICE_NAME -j ACCEPT
+~~~
+
+Es necesario conocer la MAC del tap que se ha creado, además, se agrega en una variable para ser usada posteriormente:
+~~~
+MAC="$(cat /sys/class/net/tap0/address)"
+~~~
+
+Y se inicia la microVM indicando el tap y la mac:
+~~~
+sudo ./firectl \
+  --firecracker-binary=./firecracker \
+  --kernel=/tmp/hello-vmlinux.bin \
+  --root-drive=/tmp/hello-rootfs.ext4 \
+  --cpu-template=T2 \
+  --kernel-opts="console=ttyS0 noapic reboot=k panic=1 pci=off nomodules ro" \
+  --socket-path=./firecracker-$NMV.socket \
+  --tap-device=tap0/$MAC
+~~~
+
+Una vez en la microVM se valida:
+~~~
+localhost:~# ifconfig -a
+eth0      Link encap:Ethernet  HWaddr DA:7F:BA:76:6D:AB  
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          LOOPBACK  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+localhost:~# ifconfig -a
+eth0      Link encap:Ethernet  HWaddr DA:7F:BA:76:6D:AB  
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          LOOPBACK  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+~~~
+
+Se configura la interfaz:
+~~~
+ifconfig eth0 up && ip addr add dev eth0 172.20.0.2/24
+ip route add default via 172.20.0.1 && echo "nameserver 8.8.8.8" > /etc/resolv.conf
+~~~
+
+Y se comprueba desde dentro haciendo ping a google.com:
+~~~
+localhost:~# ping google.com
+PING google.com (172.217.17.14): 56 data bytes
+64 bytes from 172.217.17.14: seq=0 ttl=117 time=17.866 ms
+~~~
 
 
-
-
-https://medium.com/@s8sg/quick-start-with-firecracker-and-firectl-in-ubuntu-f58aeedae04b
-
-
-https://www.katacoda.com/firecracker-microvm/scenarios/getting-started
-
-
-https://github.com/ftiradob/MicroVM_firecracker#1-introducci%C3%B3n-1
+Y se comprueba haciendo ping desde fuera:
+~~~
+paloma@coatlicue:~$ ping 172.20.0.2
+PING 172.20.0.2 (172.20.0.2) 56(84) bytes of data.
+64 bytes from 172.20.0.2: icmp_seq=1 ttl=255 time=0.469 ms
+~~~
