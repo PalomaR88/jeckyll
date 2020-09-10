@@ -9,7 +9,7 @@ tags: [KVM, microVM, Firecracker]
 ¿Sabías qué en la China del siglo IX, intentando crear una poción para la inmortalidad, los taoístas inventan la pólvora que pronto fue usada como espectáculo visual mediante lo que hoy conocemos como petardos? ¿Sabías qué el tema de este post no es original, sino que decidí indagar en el tema a partir de un trabajo de un compañero? Nada de esto es importante para acercarse a Firecracker y la creación de MicroVM que es lo que intentaré en este post.
 
 
-![kubernetes](https://github.com/PalomaR88/jeckyll/blob/master/assets/img/sample/firecracker/firecracker.jpg)
+![kubernetes](https://raw.githubusercontent.com/PalomaR88/jeckyll/master/assets/img/sample/firecracker/firecracker.jpg)
 
 Como se indica en la [página oficial de Firecracker](https://firecracker-microvm.github.io/), es una tecnología de virtualización de código abierto diseñada para crear y administrar micro máquinas virtuales. 
 
