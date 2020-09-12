@@ -11,9 +11,9 @@ Firewall perimetral o cortafuegos perimetral se utiliza para marcar el perímetr
 
 El Proyecto Netfilter es la comunidad de desarrolladores de software que se dedican al framework disponible en el núcleo de Linux que permite interceptar y manipular paquetes de red, entre otras cosas. Entre los componentes más conocidos de este pryecto se encuentran nftables e iptables. Siendo IPtables la herramienta encargada de inspeccionar, modificar o eliminar paquetes de la red a partir de tablas, cadenas y reglas.
 
-Pero, ¿qué es nftables? Podríamos decir que es lo mismo. Fue creada para sustituir a iptables y mejorar algunos problemas de rendimiento y escalabilidad que ésta tenía. Auna en una sola herramienta iptables, ip6tables, arptables, etc. y con una sintaxis más simple y conatible con la sintaxis de iptables tradicional. Y, aunque parece la misma herramienta, su arquitectura no se parece en nada puesto que no crea tablas, ni cadenas, ni reglas de manera predeterminada. Además, permite hacer múltiples acciones en una sola regla. 
+Pero, ¿qué es nftables? Podríamos decir que es lo mismo. Fue creada para sustituir a iptables y mejorar algunos problemas de rendimiento y escalabilidad que ésta tenía. Auna en una sola herramienta iptables, ip6tables, arptables, etc. y con una sintaxis más simple y compatible con la sintaxis de iptables tradicional. Y, aunque parece la misma herramienta, su arquitectura no se parece en nada puesto que no crea tablas, ni cadenas, ni reglas de manera predeterminada. Además, permite hacer múltiples acciones en una sola regla. 
 
-Podríamos decir que nftables es la herramienta definitiva, en estos momentos. Si quieres aprender sobre el uso de nftables, siento comunicarte que éste no es tu ligar, pues en este post se aportan los datos más significativos para poder crearse una idea de como se debe configura correctamente un cortafuego perimetral usando iptables.
+Podríamos decir que nftables es la herramienta definitiva, en estos momentos. Si quieres aprender sobre el uso de nftables, siento comunicarte que éste no es tu lugar, pues en este post se aportan los datos más significativos para poder crearse una idea de cómo se debe configura correctamente un cortafuego perimetral usando iptables.
 
 
 # IPtables
@@ -85,6 +85,7 @@ Algunas de las operaciones disponibles para el manejo de las cadenas son:
 * -Z: Poner a cero todos los contadores (paquetes y bytes) de una cadena.
 
 Ejemplos básicos:
+
 Permitir el tráfico para la interfaz loopback:
 ~~~
 iptables -A INPUT -i lo -p icmp -j ACCEPT
@@ -125,13 +126,14 @@ iptables -A INPUT -i eth1 -p icmp -j ACCEPT
 Imaginemos un escenario compuesto por una LAN sin políticas FORWARD. En este caso los equipos que componen la LAN se encuentran incomunicados, ya que no se permite el paso de paquetes por el cortafuegos. Por lo tanto, habrá que configurar los pares de reglas, FORWARD en ambas direcciones, para ir permitiendo distintos protocolos, puertos, etc. 
 
 Ejemplos básicos:
-Permitir hacer ping, protocolo icmp, desde la LAN.  
+
+Permitir hacer ping, protocolo ICMP, desde la LAN.  
 ~~~
 iptables -A FORWARD -o eth0 -i eth1 -s 192.168.100.0/24 -p icmp -j ACCEPT
 iptables -A FORWARD -i eth0 -o eth1 -d 192.168.100.0/24 -p icmp -j ACCEPT
 ~~~
 
-Consultas y respuestas DNS, protocolo udp por el  puerto 53, desde la LAN:
+Consultas y respuestas DNS, protocolo UDP por el  puerto 53, desde la LAN:
 ~~~
 iptables -A FORWARD -i eth1 -o eth0 -s 192.168.100.0/24 -p udp --dport 53 -j ACCEPT
 iptables -A FORWARD -o eth1 -i eth0 -d 192.168.100.0/24 -p udp --sport 53 -j ACCEPT
@@ -151,19 +153,13 @@ iptables -A FORWARD -o eth1 -i eth0 -d 192.168.100.0/24 -p tcp --sport 443 -j AC
 ### Source NAT
 Para cambiar la dirección origen por la externa del dispositivo de NAT.Se hace como último paso antes de enviar el paquete. Se define con la cadena POSTROUTING en la tabla NAT.
 
-Ejemplo:
-**Tras activar el ip_forwarding, Suponemos que la red interna es la 192.168.100.0/24, la interfaz externa del dispositivo de NAT ka eth0 y la IP estática externa la 80.14.1.2
-
-~~~
-iptables -t nar -A POSTROUTING -s 192.168.100.0/24 -o eth0 -j SNAT --to 80.14.1.2/32
-~~~
-**
 
 
 #### Enmascaramiento IP (IP Masquerade)
 Cuando se realiza SNAT pero la IP origen del dispositivo es dinámica se debe comprobar la IP externa del dispositivo de NAT antes de cambiarla en el paquete. Se utiliza la opción MASQUERADE.
 
-Ejemplo:
+Ejemplos básicos:
+
 SNAT para que los equipos de la LAN puedan acceder al exterior, siendo la red interna 192.168.100.0/24 y la interfaz externa del dispositivo de NAT la eth0, tras activar el ip_forwarding:
 ~~~
 iptables -t nat -A POSTROUTING -s 192.168.100.0/24 -o eth0 -j MASQUERADE
@@ -185,7 +181,8 @@ Se utiliza para exponer un puerto de un equipo interno al exterior. Para ello se
 
 Se hace como primer paso antes de tomar la decisión de encaminamiento. 
 
-Ejemplo:
+Ejemplos básicos:
+
 Suponemos que queremos enviar las peticiones al puerto 22/tcp al equipo 192.168.100.2 de la red interna. Tras habilitar ip_forwarding:
 ~~~
 iptables -t nat -A PREROUTING -p tcp --dport 22 -i eth0 -j DNAT --to 192.168.100.2
