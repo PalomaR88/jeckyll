@@ -1,7 +1,7 @@
 ---
 title: Introducción a MicroVM con Firecracker
 author: Paloma R. García Campón
-date: 2020-06-24 00:00:00 +0800
+date: 2020-08-10 00:00:00 +0800
 categories: [Administración de sistemas operativos]
 tags: [KVM, microVM, Firecracker]
 ---
