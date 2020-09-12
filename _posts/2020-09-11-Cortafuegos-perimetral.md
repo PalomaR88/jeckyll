@@ -43,6 +43,7 @@ Y las opciones básicas:
 
 Ejemplos básicos:
 > Con las cuatro órdenes que se explican a continuación se limpian todas las reglas.
+
 Borrar las reglas de la tabla FILTER:
 ~~~
 iptables -F
