@@ -74,15 +74,15 @@ Esta tabla posee una lista de reglas ordenadas, cada regla con una cadena que pu
 Un punto esencial es tener en cuenta es el orden de estas reglas. Cuando un paquete alcanza una cadena, se comprueba de forma secuencial y se ejecuta la primera regla a la que se ajuste; sin tener en cuentas las posibles reglas a las que se puede ajustar posteriormente. 
 
 Las acciones más comunes son:
-- ACCEPT: acepta el paquete.
-- DROP: elimina el paquete.
-- LOG: genera LOG de la conexión.
+- ACCEPT: aceptar el paquete.
+- DROP: eliminar el paquete.
+- LOG: generar LOG de la conexión.
 
 Algunas de las operaciones disponibles para el manejo de las cadenas son:
-* -L: lista las reglas de una cadena.
-* -P: Estable la política por defecto de una cadena.
+* -L: listar las reglas de una cadena.
+* -P: establecer la política por defecto de una cadena.
 * -F: borrar todas las reglas de una cadena.
-* -Z: Poner a cero todos los contadores (paquetes y bytes) de una cadena.
+* -Z: poner a cero todos los contadores (paquetes y bytes) de una cadena.
 
 Ejemplos básicos:
 
