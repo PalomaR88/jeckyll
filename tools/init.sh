@@ -21,20 +21,23 @@ check_status() {
 
   for i in "${!_watching_dirs[@]}"
   do
+    echo "${_watching_dirs[${i}]}"
     local _dir=${_watching_dirs[${i}]}
-    if [[ ! -z $(git status $_dir -s) ]]; then
-      echo "Warning: Commit the changes of the directory '$_dir' first."
-      git status -s | grep $_dir
-      exit 1
-    fi
+    #if [[ ! -z $(git status $_dir -s) ]]; then
+    #  echo "Warning: Commit the changes of the directory '$_dir' first."
+    #  git status -s | grep $_dir
+    #  exit 1
+    #fi
   done
 }
 
 
 update_files() {
+  echo "Empieza"
   bash _scripts/sh/create_pages.sh
+  echo "Creando pagina"
   bash _scripts/sh/dump_lastmod.sh
-
+  echo "Creando dump"
   find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 }
 

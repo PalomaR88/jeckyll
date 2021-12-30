@@ -97,6 +97,7 @@ create_tag() {
 #   $2 - type specified option
 #########################################
 create_pages() {
+  echo "Create page"
   if [[ $1 == '' ]]; then
     exit 0
   fi
@@ -134,10 +135,15 @@ main() {
 
   for _file in $(ls "_posts")
   do
+    echo "Entra aquí 1"
     local _path="_posts/$_file"
+    echo "$_file"
+    echo "Entra aquí 2"
+    echo "$_path"
     local _categories=$(read_categories "$_path")
+    echo "$_path"
+    echo "Entra aquí 3"
     local _tags=$(read_tags "$_path")
-
     create_pages "$_categories" $TYPE_CATEGORY
     create_pages "$_tags" $TYPE_TAG
   done

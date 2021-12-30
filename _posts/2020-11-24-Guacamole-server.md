@@ -1,3 +1,11 @@
+---
+title: Guacamole-server
+author: Paloma R. García Campón
+date: 2020-11-24 00:00:00 +0800
+categories: [Implantación de aplicaciones web]
+tags: [Apache, Guacamole]
+---
+
 # Guacamole-server
 
 Guacamole es un proyecto de código abierto que permite acceder a otros equipos de forma remota, soportando protocolos estándar como VNC, RDP y SSH utilizando HTML5. 
