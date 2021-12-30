@@ -1,7 +1,7 @@
 ---
 title: Creación de un escenario básico con KVM y libvirt
 author: Paloma R. García Campón
-date: 2021-29-12 00:00:00 +0800
+date: 2021-12-29 00:00:00 +0800
 categories: [Administración de sistemas operativos]
 tags: [KVM, VM, libvirt]
 ---
