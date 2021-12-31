@@ -18,7 +18,7 @@ El cluster estará formado por un nodo maestro y dos minios. Pero antes, se necc
 - Un anfitrión con Ansible instalado. 
 - Confguración de un par de claves SSH.
 
-Para estos pasos iniciales, se puede seguir mi guía [Instalación de Ansible](). La versión de Ansible 2.12.1.
+Para estos pasos iniciales, se puede seguir mi guía [Instalación de Ansible](https://www.palomargc.com/posts/Instalacion-de-Ansible/). La versión de Ansible 2.12.1.
 
 
 ## Cominicación de Ansible para implementar Kubernetes
