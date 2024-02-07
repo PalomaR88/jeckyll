@@ -174,7 +174,7 @@ prueba.md
 Para que el punto de montaje sea permanente se debe configurar el fichero /etc/fstab y añadir la siguiente línea:
 
 ~~~
-UUID=iAP8kO-hRfR-6IiS-mo8G-z6N8-Wf7V-uDKYcy /mnt/raid5  xfs     defautls        0       0
+UUID=iAP8kO-hRfR-6IiS-mo8G-z6N8-Wf7V-uDKYcy /mnt/raid5  xfs     defaults        0       0
 ~~~
 
 
